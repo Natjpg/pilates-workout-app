@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>PilatesApp</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            .tab-content {
+                display: none;
+            }
+            .tab-content.active {
+                display: block;
+            }
+            .tag {
+                background-color: #e0f7f6;
+                color: #0d9488;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.8rem;
+                margin-right: 4px;
+                margin-bottom: 4px;
+                display: inline-block;
+            }
+            .exercise-item {
+                border-bottom: 1px solid #e5e7eb;
+                padding: 12px 0;
+                transition: all 0.2s ease;
+            }
+            /* Add these new styles */
+            .exercise-item.drag-over {
+                border: 2px dashed #00897b;
+                transform: scale(1.02);
+                background-color: #f0fdfa;
+            }
+            .exercise-item:hover .cursor-move {
+                opacity: 1;
+            }
+            .cursor-move {
+                opacity: 0.5;
+                cursor: grab;
+            }
+            .cursor-move:active {
+                cursor: grabbing;
+            }
+        </style>
+    </head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-teal-700 text-white p-4 fixed top-0 w-full z-10">
+        <h1 class="text-2xl font-bold text-center">PilatesApp</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="mt-16 mb-20 px-4">
+        <!-- Exercise Tab -->
+        <div class="tab-content active" id="exercises">
+            <!-- Search Bar -->
+            <div class="sticky top-16 bg-gray-50 pt-2 pb-2">
+                <input type="text" 
+       id="exerciseSearchInput" 
+       placeholder="Search exercises..." 
+       class="w-full p-2 border rounded-lg shadow-sm mb-2">
+                <button class="bg-teal-500 text-white px-4 py-2 rounded-lg w-full add-exercise-button">
+                    + Add Exercise
+                </button>
+            </div>
+
+            <!-- Exercise List -->
+            <div class="mt-2" id="exerciseList">
+                <!-- Exercises will be loaded here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Workout Tab -->
+        <div class="tab-content" id="workout">
+            <div class="flex h-[calc(100vh-120px)]">
+                <!-- Left side: Exercise Library -->
+                <div class="w-1/2 p-2 border-r overflow-y-auto">
+                    <div class="sticky top-0 bg-white pb-2">
+                        <h3 class="font-bold mb-2">Exercise Library</h3>
+                        <input type="text" placeholder="Search exercises..." 
+                               class="w-full p-2 border rounded-lg shadow-sm mb-2"
+                               id="workoutSearchInput">
+                        <!-- Add this button -->
+                        <button onclick="showModal()" class="bg-teal-500 text-white px-4 py-2 rounded-lg w-full mb-2">
+                            + Add New Exercise
+                        </button>
+                    </div>
+                    <div id="workoutExerciseList" class="space-y-2">
+                        <!-- Exercises will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Right side: Current Workout -->
+                <div class="w-1/2 p-2 overflow-y-auto">
+                    <div class="sticky top-0 bg-white pb-2">
+                        <h3 class="font-bold mb-2">Current Workout</h3>
+                        <div class="flex gap-2 mb-2">
+                            <button onclick="saveWorkout()" class="bg-teal-500 text-white px-4 py-2 rounded-lg flex-1">Save</button>
+                            <button onclick="clearWorkout()" class="bg-gray-500 text-white px-4 py-2 rounded-lg flex-1">Clear</button>
+                        </div>
+                    </div>
+                    <div id="currentWorkoutList" class="space-y-2">
+                        <!-- Current workout exercises will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Tab -->
+<div class="tab-content" id="saved">
+    <div class="p-4">
+        <h2 class="text-xl font-bold mb-4">Saved Workouts</h2>
+        <div id="savedWorkoutsList" class="space-y-4">
+            <!-- Saved workouts will be loaded here -->
+        </div>
+    </div>
+</div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full bg-white border-t shadow-lg">
+        <div class="flex justify-around">
+            <button onclick="showTab('exercises')" class="flex-1 p-4 text-center text-teal-600">
+                Exercises
+            </button>
+            <button onclick="showTab('workout')" class="flex-1 p-4 text-center">
+                Workout
+            </button>
+            <button onclick="showTab('saved')" class="flex-1 p-4 text-center">
+                Saved
+            </button>
+        </div>
+    </nav>
+
+    <script src="script.js"></script>
+<!-- Modal for adding exercises -->
+<div id="exerciseModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
+    <div class="bg-white p-4 rounded-lg shadow-lg max-w-md w-full mx-4">
+        <h2 class="text-xl font-bold mb-4">Add New Exercise</h2>
+        <form id="exerciseForm" class="space-y-4">
+            <div>
+                <label for="exerciseName" class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" 
+                       id="exerciseName" 
+                       name="exerciseName" 
+                       required
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border">
+            </div>
+            <div>
+                <label for="exerciseDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea id="exerciseDescription" 
+                          name="exerciseDescription" 
+                          required
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"></textarea>
+            </div>
+            <div>
+                <label for="exerciseTags" class="block text-sm font-medium text-gray-700">Tags (comma-separated)</label>
+                <input type="text" 
+                       id="exerciseTags" 
+                       name="exerciseTags"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                       placeholder="e.g., beginner, core, stretching">
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg">Cancel</button>
+                <button type="submit"
+                        class="px-4 py-2 bg-teal-500 text-white rounded-lg">Add Exercise</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
